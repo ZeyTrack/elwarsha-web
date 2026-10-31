@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-
+import { ProtectedRoute } from "./routes/ProtectedRoute.js";
 import { queryClient } from "../core/query/client.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 import { LocaleHome } from "./LocaleHome.js";
@@ -8,6 +8,7 @@ import { PublicLayout } from "./PublicLayout.js";
 import { RootRedirect } from "./RootRedirect.js";
 import { RoutedPage } from "./RoutedPage.js";
 import { portalRoutes, publicRoutes } from "./routes/registry.js";
+import { SessionProvider } from "@core/session/SessionContext";
 
 export function App() {
   return (
@@ -22,7 +23,9 @@ export function App() {
 }
 
 export function AppRoutes() {
+  console.log("AppRoutes with SessionProvider");
   return (
+    <SessionProvider> 
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/:locale" element={<PublicLayout />}>
@@ -36,6 +39,7 @@ export function AppRoutes() {
               element={<RoutedPage route={route} />}
             />
           ))}
+          <Route element={<ProtectedRoute />}>
         {portalRoutes.map((route) => (
           <Route
             key={route.id}
@@ -44,6 +48,8 @@ export function AppRoutes() {
           />
         ))}
       </Route>
+      </Route>
     </Routes>
+    </SessionProvider>
   );
 }

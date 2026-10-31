@@ -1,8 +1,8 @@
-import { NavLink } from "react-router-dom";
-
+import { NavLink, useNavigate } from "react-router-dom";
+import { api } from "@core/api";
 import { messages, type Locale } from "@core/i18n";
 import { Badge } from "@ui/components/Badge/Badge";
-
+import { useSessionContext } from "@core/session/SessionContext";
 import styles from "./SiteHeader.module.css";
 
 export function SiteHeader({
@@ -14,6 +14,13 @@ export function SiteHeader({
 }) {
   const copy = messages[locale];
   const prefix = `/${locale}`;
+  const session = useSessionContext();
+    const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await session.logout();
+    navigate(`${prefix}/`);
+  }
 
   return (
     <header className={styles.header}>
@@ -39,6 +46,18 @@ export function SiteHeader({
         <NavLink className={styles.applyBtn} to={`${prefix}/apply/`}>
           {copy.nav.apply}
         </NavLink>
+        {session.status === "authenticated" ? (
+          <>
+            <span>{session.session.user.displayName}</span>
+            <button className={styles.lang} type="button" onClick={() => void handleSignOut()}>
+              {copy.auth.signOut}
+            </button>
+          </>
+        ) : session.status === "unauthenticated" ? (
+          <a className={styles.applyBtn} href={api.loginUrl({ locale })}>
+            {copy.auth.signIn}
+          </a>
+        ) : null}
       </div>
     </header>
   );
